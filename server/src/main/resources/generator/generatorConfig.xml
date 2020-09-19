@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+    <context id="Mysql" targetRuntime="MyBatis3" defaultModelType="flat">
+        <!-- 添加后sql语句中的关键字和表用``区分-->
+        <property name="beginningDelimiter" value="`"/>
+        <property name="endingDelimiter" value="`"/>
+
+        <!--  生成实例类的tostring方法   -->
+        <plugin type="org.mybatis.generator.plugins.ToStringPlugin"/>
+
+        <!--  删除所有注释-->
+        <commentGenerator>
+            <property name="suppressAllComments" value="true"/>
+        </commentGenerator>
+
+        <!--连接数据库，修改自己的数据库名用户名密码-->
+        <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+                        connectionURL="jdbc:mysql://localhost:3306/course"
+                        userId="root"
+                        password="czj666666">
+        </jdbcConnection>
+
+        <!-- domain类的位置 -->
+        <javaModelGenerator targetProject="src/main/java"
+                            targetPackage="com.course.server.domain"/>
+
+        <!-- mapper xml的位置 -->
+        <sqlMapGenerator targetProject="src/main/resources"
+                         targetPackage="mapper"/>
+
+        <!-- mapper类的位置 -->
+        <javaClientGenerator targetProject="src/main/java"
+                             targetPackage="com.course.server.mapper"
+                             type="XMLMAPPER" />
+
+
+        <table tableName="test" domainObjectName="Test"></table>
+    </context>
+</generatorConfiguration>
