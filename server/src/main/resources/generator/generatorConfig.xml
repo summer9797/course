@@ -9,6 +9,8 @@
         <property name="beginningDelimiter" value="`"/>
         <property name="endingDelimiter" value="`"/>
 
+        <!--  生成xml文件自动覆盖之前的文件  -->
+        <plugin type="org.mybatis.generator.plugins.UnmergeableXmlMappersPlugin"/>
         <!--  生成实例类的tostring方法   -->
         <plugin type="org.mybatis.generator.plugins.ToStringPlugin"/>
 
