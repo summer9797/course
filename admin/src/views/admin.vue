@@ -492,6 +492,17 @@
             _this.activeSidebar(_this.$route.name.replace("/","-")+"-sidebar");
         },
         methods: {
+            activeSidebar: function (id) {
+                $("#"+id).siblings().removeClass("active");
+                $("#"+id).siblings().find("li").removeClass("active");
+                $("#"+id).addClass("active");
+
+                let parentLi = $("#"+id).parents("li");
+                if(parentLi){
+                    parentLi.siblings().removeClass("active open");
+                    parentLi.addClass("active open");
+                }
+            }
         },
         watch:{
             $route:{
@@ -501,17 +512,6 @@
                         _this.activeSidebar(_this.$route.name.replace("/","-")+"-sidebar");
                     })
                 }
-            }
-        },
-        activeSidebar: function (id) {
-            $("#"+id).siblings().removeClass("active");
-            $("#"+id).siblings().find("li").removeClass("active");
-            $("#"+id).addClass("active");
-
-            let parentLi = $("#"+id).parents("li");
-            if(parentLi){
-                parentLi.siblings().removeClass("active open");
-                parentLi.addClass("active open");
             }
         }
     }
