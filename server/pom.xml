@@ -35,9 +35,7 @@
         </dependency>
         <dependency>
             <groupId>com.github.pagehelper</groupId>
-            <artifactId>pagehelper</artifactId>
-            <version>5.2.0</version>
-            <scope>compile</scope>
+            <artifactId>pagehelper-spring-boot-starter</artifactId>
         </dependency>
     </dependencies>
 </project>

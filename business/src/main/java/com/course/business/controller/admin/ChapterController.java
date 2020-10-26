@@ -1,12 +1,12 @@
 package com.course.business.controller.admin;
 
-import com.course.server.domain.Chapter;
 import com.course.server.dto.ChapterDto;
 import com.course.server.dto.PageDto;
+import com.course.server.dto.ResponseDto;
 import com.course.server.service.ChapterService;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.course.server.util.UuidUtil;
+import org.checkerframework.common.value.qual.StringVal;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
@@ -17,9 +17,26 @@ public class ChapterController {
     @Resource
     private ChapterService chapterService;
 
-    @RequestMapping("/list")
-    public PageDto list(@RequestBody PageDto pageDto){
+    @PostMapping("/list")
+    public ResponseDto list(@RequestBody PageDto pageDto){
         chapterService.list(pageDto);
-        return pageDto;
+        ResponseDto responseDto = new ResponseDto();
+        responseDto.setContent(pageDto);
+        return responseDto;
+    }
+
+    @PostMapping("/save")
+    public ResponseDto save(@RequestBody ChapterDto chapterDto){
+        chapterService.save(chapterDto);
+        ResponseDto responseDto = new ResponseDto();
+        responseDto.setContent(chapterDto);
+        return responseDto;
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseDto delete(@PathVariable String id){
+        chapterService.delete(id);
+        ResponseDto responseDto = new ResponseDto();
+        return responseDto;
     }
 }

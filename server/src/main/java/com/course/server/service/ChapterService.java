@@ -5,19 +5,18 @@ import com.course.server.domain.ChapterExample;
 import com.course.server.dto.ChapterDto;
 import com.course.server.dto.PageDto;
 import com.course.server.mapper.ChapterMapper;
+import com.course.server.util.CopyUtil;
+import com.course.server.util.UuidUtil;
 import com.github.pagehelper.PageInfo;
-import com.github.pagehelper.PageInterceptor;
-import org.apache.ibatis.plugin.Interceptor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import com.github.pagehelper.PageHelper;
+import org.springframework.util.StringUtils;
 
 
 @Service
@@ -27,38 +26,37 @@ public class ChapterService {
     private ChapterMapper chapterMapper;
 
     public void list(PageDto pageDto){
-        PageHelper pageHelper = new PageHelper();
-        pageHelper.startPage(pageDto.getPage(),pageDto.getSize());
+        PageHelper.startPage(pageDto.getPage(),pageDto.getSize());
 
         ChapterExample chapterExample = new ChapterExample();
         List<Chapter> chapterList = chapterMapper.selectByExample(chapterExample);
 
         PageInfo<Chapter> pageInfo = new PageInfo<>(chapterList);
         pageDto.setTotal(pageInfo.getTotal());
-        List<ChapterDto> chapterDtosList = new ArrayList<>();
-        for (int i = 0; i < chapterList.size(); i++) {
-            Chapter chapter = chapterList.get(i);
-            ChapterDto chapterDto = new ChapterDto();
-            BeanUtils.copyProperties(chapter,chapterDto);
-            chapterDtosList.add(chapterDto);
-        }
+        List<ChapterDto> chapterDtosList;
+        chapterDtosList = CopyUtil.copyList(chapterList,ChapterDto.class);
         pageDto.setList(chapterDtosList);
-    };
+    }
 
-//    @Bean
-//    public PageHelper pageHelper() {
-//        PageHelper pageHelper = new PageHelper();
-//        Properties p = new Properties();
-//        p.setProperty("helperDialect", "Mysql");
-//        p.setProperty("supportMethodsArguments", "true");
-//        p.setProperty("reasonable", "false");
-//        p.setProperty("params", "count=countSql");
-//        pageHelper.setProperties(p);
-//        return pageHelper;
-//    }
+    public void save(ChapterDto chapterDto){
+        Chapter chapter = CopyUtil.copy(chapterDto,Chapter.class);
+        if(StringUtils.isEmpty(chapter.getId())){
+            this.insert(chapter);
+        }else{
+            this.update(chapter);
+        }
+    }
 
-    @Bean
-    public Interceptor[] plugins() {
-        return new Interceptor[]{new PageInterceptor()};
+    private void insert(Chapter chapter){
+        chapter.setId(UuidUtil.getShortUuid());
+        chapterMapper.insert(chapter);
+    }
+
+    private void update(Chapter chapter){
+        chapterMapper.updateByPrimaryKey(chapter);
+    }
+
+    public void delete(String id){
+        chapterMapper.deleteByPrimaryKey(id);
     }
 }

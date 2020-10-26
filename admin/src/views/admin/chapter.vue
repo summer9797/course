@@ -1,6 +1,11 @@
 <template>
     <div>
         <p>
+            <button v-on:click="add()" class="btn btn-white btn-default btn-round">
+                <i class="ace-icon fa fa-edit red2"></i>
+                add
+            </button>
+            &nbsp;
             <button v-on:click="list(1)" class="btn btn-white btn-default btn-round">
                 <i class="ace-icon fa fa-refresh red2"></i>
                 refresh
@@ -14,7 +19,7 @@
             <tr>
                 <th>ID</th>
                 <th>名称</th>
-                <th>课程</th>
+                <th>课程ID</th>
                 <th>操作</th>
             </tr>
             </thead>
@@ -26,60 +31,48 @@
                 <td>{{chapter.courseId}}</td>
                 <td>
                     <div class="hidden-sm hidden-xs btn-group">
-                        <button class="btn btn-xs btn-success">
-                            <i class="ace-icon fa fa-check bigger-120"></i>
-                        </button>
-
                         <button class="btn btn-xs btn-info">
-                            <i class="ace-icon fa fa-pencil bigger-120"></i>
+                            <i v-on:click="edit(chapter)" class="ace-icon fa fa-pencil bigger-120"></i>
                         </button>
-
                         <button class="btn btn-xs btn-danger">
-                            <i class="ace-icon fa fa-trash-o bigger-120"></i>
+                            <i v-on:click="del(chapter.id)" class="ace-icon fa fa-trash-o bigger-120"></i>
                         </button>
-
-                        <button class="btn btn-xs btn-warning">
-                            <i class="ace-icon fa fa-flag bigger-120"></i>
-                        </button>
-                    </div>
-
-                    <div class="hidden-md hidden-lg">
-                        <div class="inline pos-rel">
-                            <button class="btn btn-minier btn-primary dropdown-toggle" data-toggle="dropdown" data-position="auto">
-                                <i class="ace-icon fa fa-cog icon-only bigger-110"></i>
-                            </button>
-
-                            <ul class="dropdown-menu dropdown-only-icon dropdown-yellow dropdown-menu-right dropdown-caret dropdown-close">
-                                <li>
-                                    <a href="#" class="tooltip-info" data-rel="tooltip" title="View">
-																			<span class="blue">
-																				<i class="ace-icon fa fa-search-plus bigger-120"></i>
-																			</span>
-                                    </a>
-                                </li>
-
-                                <li>
-                                    <a href="#" class="tooltip-success" data-rel="tooltip" title="Edit">
-																			<span class="green">
-																				<i class="ace-icon fa fa-pencil-square-o bigger-120"></i>
-																			</span>
-                                    </a>
-                                </li>
-
-                                <li>
-                                    <a href="#" class="tooltip-error" data-rel="tooltip" title="Delete">
-																			<span class="red">
-																				<i class="ace-icon fa fa-trash-o bigger-120"></i>
-																			</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
                     </div>
                 </td>
             </tr>
             </tbody>
         </table>
+
+        <div id="form-modal" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">表单</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form class="form-horizontal">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">名称</label>
+                                <div class="col-sm-10">
+                                    <input v-model="chapter.name" class="form-control" placeholder="名称">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">课程ID</label>
+                                <div class="col-sm-10">
+                                    <input v-model="chapter.courseId" class="form-control" placeholder="课程ID">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" v-on:click="save()" class="btn btn-primary">Save changes</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
 
     </div>
 
@@ -94,6 +87,7 @@
         name: "chapter",
         data: function(){
             return{
+                chapter: {},
                 chapters:[]
             }
         },
@@ -104,15 +98,67 @@
         methods: {
             list(page) {
                 let _this = this;
-                console.log(page, _this.$refs.pagination.size),
+                console.log(page, _this.$refs.pagination.size);
                 _this.$ajax.post('http://127.0.0.1:9000/business/admin/chapter/list',{
                     page: page,
                     size: _this.$refs.pagination.size
                 }).then((response)=>{
                     console.log(response);
-                    _this.chapters = response.data.list;
-                    _this.$refs.pagination.render(page, response.data.total)
+                    let res = response.data;
+                    _this.chapters = res.content.list;
+                    _this.$refs.pagination.render(page, res.content.total);
                 })
+            },
+            add() {
+                let _this = this;
+                _this.chapter = {};
+                $("#form-modal").modal("show");
+            },
+            edit(chapter) {
+                let _this = this;
+                _this.chapter = $.extend({},chapter);
+                $("#form-modal").modal("show");
+            },
+            save(page) {
+                let _this = this;
+                console.log(page);
+                _this.$ajax.post('http://127.0.0.1:9000/business/admin/chapter/save',_this.chapter).then((response)=>{
+                    console.log("保存大章结果",response);
+                    let res = response.data;
+                    if(res.success){
+                        $("#form-modal").modal("hide");
+                        _this.list(1);
+                    }
+                })
+            },
+            del(id) {
+                let _this = this;
+                console.log(id);
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        _this.$ajax.delete('http://127.0.0.1:9000/business/admin/chapter/delete/'+id).then((response)=>{
+                            console.log("删除大章结果",response);
+                            let res = response.data;
+                            if(res.success){
+                                Swal.fire(
+                                    'Deleted!',
+                                    'Your file has been deleted.',
+                                    'success'
+                                )
+                                _this.list(1);
+                            }
+                        })
+                    }
+                })
+
             }
         }
     }
