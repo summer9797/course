@@ -98,12 +98,14 @@
         methods: {
             list(page) {
                 let _this = this;
+                Loading.show();
                 console.log(page, _this.$refs.pagination.size);
                 _this.$ajax.post('http://127.0.0.1:9000/business/admin/chapter/list',{
                     page: page,
                     size: _this.$refs.pagination.size
                 }).then((response)=>{
                     console.log(response);
+                    Loading.hide();
                     let res = response.data;
                     _this.chapters = res.content.list;
                     _this.$refs.pagination.render(page, res.content.total);
@@ -121,44 +123,42 @@
             },
             save(page) {
                 let _this = this;
+
+                // 保存校验
+                if (!Validator.require(_this.chapter.name, "名称")
+                    || !Validator.require(_this.chapter.courseId,"课程ID")
+                    || !Validator.length(_this.chapter.courseId, "课程ID", 1, 8)) {
+                    return;
+                }
+
+                Loading.show();
                 console.log(page);
                 _this.$ajax.post('http://127.0.0.1:9000/business/admin/chapter/save',_this.chapter).then((response)=>{
                     console.log("保存大章结果",response);
                     let res = response.data;
+                    Loading.hide();
                     if(res.success){
                         $("#form-modal").modal("hide");
                         _this.list(1);
+                        Toast.success("保存成功");
                     }
                 })
             },
             del(id) {
                 let _this = this;
                 console.log(id);
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, delete it!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        _this.$ajax.delete('http://127.0.0.1:9000/business/admin/chapter/delete/'+id).then((response)=>{
-                            console.log("删除大章结果",response);
-                            let res = response.data;
-                            if(res.success){
-                                Swal.fire(
-                                    'Deleted!',
-                                    'Your file has been deleted.',
-                                    'success'
-                                )
-                                _this.list(1);
-                            }
-                        })
-                    }
-                })
-
+                Confirm.show("删除后不能还原，是否确认删除？",function() {
+                    Loading.show();
+                    _this.$ajax.delete('http://127.0.0.1:9000/business/admin/chapter/delete/'+id).then((response)=>{
+                                    console.log("删除大章结果",response);
+                                    let res = response.data;
+                                    Loading.hide();
+                                    if(res.success){
+                                        Toast.success("删除成功");
+                                        _this.list(1);
+                                    }
+                                })
+                });
             }
         }
     }
