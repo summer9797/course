@@ -99,12 +99,10 @@
             list(page) {
                 let _this = this;
                 Loading.show();
-                console.log(page, _this.$refs.pagination.size);
                 _this.$ajax.post('http://127.0.0.1:9000/business/admin/chapter/list',{
                     page: page,
                     size: _this.$refs.pagination.size
                 }).then((response)=>{
-                    console.log(response);
                     Loading.hide();
                     let res = response.data;
                     _this.chapters = res.content.list;
@@ -132,7 +130,6 @@
                 }
 
                 Loading.show();
-                console.log(page);
                 _this.$ajax.post('http://127.0.0.1:9000/business/admin/chapter/save',_this.chapter).then((response)=>{
                     console.log("保存大章结果",response);
                     let res = response.data;
@@ -141,12 +138,13 @@
                         $("#form-modal").modal("hide");
                         _this.list(1);
                         Toast.success("保存成功");
+                    }else {
+                        Toast.warning(res.message);
                     }
                 })
             },
             del(id) {
                 let _this = this;
-                console.log(id);
                 Confirm.show("删除后不能还原，是否确认删除？",function() {
                     Loading.show();
                     _this.$ajax.delete('http://127.0.0.1:9000/business/admin/chapter/delete/'+id).then((response)=>{
